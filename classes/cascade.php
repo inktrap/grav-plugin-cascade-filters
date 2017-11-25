@@ -4,7 +4,7 @@ namespace Grav\Plugin;
 
 use Grav\Common\GravTrait;
 
-class CascadeFilters {
+class Cascade {
 	use GravTrait;
 
 	protected $filters;
@@ -81,10 +81,11 @@ class CascadeFilters {
 						$taxonomylist[ $x ][ strval( $key ) ] = count( $value );
 						$partial[ strval( $key ) ]            = count( $value );
 					}
-					arsort( $partial );
+                    arsort($partial);
 					$newlist[ $x ] = $partial;
 				}
 			}
+            arsort($newlist);
 			$cache->save( $hash, $newlist );
 			$this->taxonomylist = $newlist;
 		}

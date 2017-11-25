@@ -1,0 +1,63 @@
+
+7{# generate url link, the link has 3 states: active normal disabled #}
+{% macro genQueryUrl(queries, key, tax, url, cascadeFilters, label="") %}
+    {#
+    {{ dump("genQueryUrl") }}
+    {{ dump(key) }}
+    {{ dump("tax:") }}
+    {{ dump(tax) }}
+    #}
+    {# skip empty keys (header fields in grav are quoted and might be empty #}
+    {% if not tax == "" %}
+        {% if label == "" %}
+            {% set label = tax %}
+        {% endif %}
+        {% set active = '' %}
+        {% if  queries[key] is defined and queries[key] == tax %}
+            {% set queries = queries|merge({(key): null}) %}
+            {% set active = 'is-active' %}
+        {% else %}
+            {% set queries = queries|merge({(key): tax})  %}
+        {% endif %}
+        {% set disabled = cascadeFilters.isDisabled((queries))?'disabled':'' %}
+        {% set status = active? (active) : (disabled) %}
+        <a href="{{ url | rtrim('/') }}/?{{ queries|url_encode }}" class="{{ status }}">{{ label|capitalize }}</a>
+    {% endif %}
+{% endmacro %}
+
+<span class="tags">
+    {% for tax,value in taxlist[taxonomy] %}
+        {% set active = uri.param(taxonomy) == tax ? 'active' : '' %}
+    {% endfor %}
+</span>
+
+{# taxlist is the list of all defined taxonomies #}
+{% macro activeSelectors(queries, taxlist, url, cascadeFilters) %}
+    {% import _self as f %}
+    {#
+    {{ dump("beginning of activeSelectors") }}
+    {{ dump(taxlist) }}
+    {{ dump(queries) }}
+    #}
+    {% if taxlist %}
+        {% if queries %}
+            {% for key, tax in queries %}
+                {% if key in taxlist %}
+                    {#
+                    {{ dump("activeSelectors") }}
+                    {{ dump(key) }}
+                    {{ dump(tax) }}
+                    #}
+                    <span class="tags {{key}}">
+                        {#
+                        {{ dump(f.genQueryUrl(queries|sort, key, tax, url, cascadeFilters)) }}
+                        #}
+                        {{ f.genQueryUrl(queries|sort, key, tax, url, cascadeFilters) }}
+                    </span>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        No taxonomies defined.
+    {% endif %}
+{% endmacro %}
